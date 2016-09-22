@@ -15,8 +15,8 @@ end
 function DatabaseCacheHandler:init_worker()
   DatabaseCacheHandler.super.init_worker(self)
 
-  cache.rawset(INVOCATIONS, 0)
-  cache.rawset(LOOKUPS, 0)
+  cache.set(INVOCATIONS, 0)
+  cache.set(LOOKUPS, 0)
 end
 
 function DatabaseCacheHandler:access(conf)

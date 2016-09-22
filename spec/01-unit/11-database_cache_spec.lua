@@ -31,4 +31,9 @@ describe("Database cache", function()
     assert.are.equal("requests", cache.requests_key())
   end)
 
+  it("sets and gets", function()
+    cache.set("hello", "world")
+    assert.equal("world", cache.get("hello"))
+  end)
+
 end)

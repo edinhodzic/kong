@@ -1,5 +1,6 @@
 local singletons = require "kong.singletons"
 local responses = require "kong.tools.responses"
+local ev = require "resty.worker.events"
 
 local pairs = pairs
 local table_insert = table.insert
@@ -88,7 +89,7 @@ return {
       end
 
       -- Trigger event in the node
-      singletons.events:publish(message_t.type, message_t)
+      ev.post("cluster", message_t.type, message_t)
 
       return responses.send_HTTP_OK()
     end
