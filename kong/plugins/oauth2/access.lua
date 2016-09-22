@@ -131,9 +131,7 @@ local function authorize(conf)
   if not is_https then
     response_params = {[ERROR] = "access_denied", error_description = err or "You must use HTTPS"}
   else
-    if conf.provision_key ~= parameters.provision_key then
-      response_params = {[ERROR] = "invalid_provision_key", error_description = "Invalid provision_key"}
-    elseif not parameters.authenticated_userid or utils.strip(parameters.authenticated_userid) == "" then
+    if not parameters.authenticated_userid or utils.strip(parameters.authenticated_userid) == "" then
       response_params = {[ERROR] = "invalid_authenticated_userid", error_description = "Missing authenticated_userid parameter"}
     else
       local response_type = parameters[RESPONSE_TYPE]
