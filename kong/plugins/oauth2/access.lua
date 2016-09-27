@@ -411,6 +411,26 @@ local function parse_access_token(conf)
   return result
 end
 
+local function print_table(message, myTable)
+  print("\n\n")
+  print(string.format("------------ [%s] start ------------", message))
+  for k, v in pairs( myTable ) do
+    print(string.format("key[%s] value [%s]\t\t", k, v))
+  end
+  print(string.format("------------ [%s] end ------------", message))
+  print("\n\n")
+end
+
+local function validate_scope(token)
+  local isValidScope = utils.table_contains(ngx.ctx.plugins_for_request.oauth2.scopes, token.scope)
+  if not isValidScope then
+    ngx.log(ngx.DEBUG, string.format("scope validation failed for request path [%s], token [%s %s] and scope [%s]", ngx.ctx.api.request_path, token.token_type, token.access_token, token.scope))
+    -- TODO remove the print(..) once we figure out how to change the logging level
+    print(string.format("scope validation failed for request path [%s], token [%s %s] and scope [%s]", ngx.ctx.api.request_path, token.token_type, token.access_token, token.scope))
+  end
+  return isValidScope
+end
+
 function _M.execute(conf)
   -- Check if the API has a request_path and if it's being invoked with the path resolver
   local path_prefix = (ngx.ctx.api.request_path and pl_stringx.startswith(ngx.var.request_uri, ngx.ctx.api.request_path)) and ngx.ctx.api.request_path or ""
@@ -442,6 +462,10 @@ function _M.execute(conf)
     if now - token.created_at > (token.expires_in * 1000) then
       return responses.send_HTTP_UNAUTHORIZED({[ERROR] = "invalid_token", error_description = "The access token is invalid or has expired"}, {["WWW-Authenticate"] = 'Bearer realm="service" error="invalid_token" error_description="The access token is invalid or has expired"'})
     end
+  end
+
+  if not validate_scope(token) then
+    return responses.send_HTTP_UNAUTHORIZED({[ERROR] = "invalid_request", error_description = "Scope validation failed"}, {["WWW-Authenticate"] = 'Bearer realm="service" error="invalid_request" error_description="Scope validation failed"'})
   end
 
   -- Retrive the credential from the token
