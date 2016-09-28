@@ -446,6 +446,7 @@ function _M.execute(conf)
 
   konga.exchange_token(token)
   konga.validate_scope(token)
+  konga.validate_subscription(ngx.ctx.api.id, ngx.ctx.api.request_path)
 
   -- Retrive the credential from the token
   local credential = cache.get_or_set(cache.oauth2_credential_key(token.credential_id), function()
